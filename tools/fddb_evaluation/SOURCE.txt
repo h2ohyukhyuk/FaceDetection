@@ -1,0 +1,4 @@
+FDDB original evaluator by Vidit Jain, University of Massachusetts Amherst.
+Source mirror: https://github.com/zimenglan-sysu-512/fddb-eval-code/tree/master/evaluation
+Original matching/ROC algorithms retained. Compatibility headers cv.h/highgui.h adapt removed OpenCV APIs to OpenCV 4.
+Build: ./build.sh (requires g++, pkg-config, OpenCV 4 development files).

@@ -67,3 +67,12 @@ VALID:
   EVAL_IOU_THRESHOLD: 0.5
   AP_SCORE_THRESHOLD: 0.001
   GT_DIR: '/home/j/projects/FaceDetection/dataset/widerface_eval_gt' 
+
+# Independent FDDB validation; excluded from training and model selection.
+FDDB:
+  ENABLED: true
+  ROOT: '/home/j/database/FDDB copy'
+  BATCH_SIZE: 1
+  WORKERS: 1
+  INTERVAL: 1
+  EVALUATOR: '/home/j/projects/FaceDetection/tools/fddb_evaluation/evaluate'

@@ -9,14 +9,14 @@ MODEL:
   PRETRAINED: true
   EXPORTABLE: false
   ALIGN_CORNERS: true
-  OUTPUT_FORMAT: 'heatmap_offset_wh2'
-  PATH_SAVE: '/home/j/models/face_detection/apag-fpn2-nopretrain'
+  OUTPUT_FORMAT: 'heatmap_offset_wh2_widerface'
+  PATH_SAVE: '/home/j/models/face_detection/apag-fpn2-nopretrain-wider-original'
 
 
 DATASET:
-  NAME: "wider_face_center2"
-  ROOT_TRAIN: "/home/j/database/widerface/train"
-  ROOT_VALID: "/home/j/database/face_detection_valid_aspa"
+  NAME: "wider_face_original2"
+  ROOT_TRAIN: "/home/j/database/widerface_original"
+  ROOT_VALID: "/home/j/database/widerface_original"
   NUM_CLASS: 1
 
 AUGMENTATION:
@@ -63,3 +63,17 @@ VALID:
   SHUFFLE: false
   SCORE_THRESHOLD: 0.4
   IOU_THRESHOLD: 0.4
+  NMS_IOU_THRESHOLD: 0.4
+  EVAL_IOU_THRESHOLD: 0.5
+  AP_SCORE_THRESHOLD: 0.001
+  GT_DIR: '/home/j/projects/FaceDetection/dataset/widerface_eval_gt'
+
+
+# Independent FDDB validation; excluded from training and model selection.
+FDDB:
+  ENABLED: true
+  ROOT: '/home/j/database/FDDB copy'
+  BATCH_SIZE: 1
+  WORKERS: 1
+  INTERVAL: 1
+  EVALUATOR: '/home/j/projects/FaceDetection/tools/fddb_evaluation/evaluate'

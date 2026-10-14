@@ -13,6 +13,10 @@ import torch
 class Validationer:
     def __init__(self,conf):
         self.conf=conf
+        self.fddb = None
+        if conf.get('FDDB', {}).get('ENABLED', False):
+            from utils.fddb_validation import FDDBValidation
+            self.fddb = FDDBValidation(conf)
         self.device=torch.device('cuda:0' if conf['DEVICE']=='GPU' else 'cpu')
         self.path=Path(conf['MODEL']['PATH_SAVE'])
         self.best_ap=-1.
@@ -60,4 +64,6 @@ class Validationer:
                      self.conf['MODEL']['INPUT_SIZE'],self.decode_score,self.nms_iou)
         with open(self.path/'validation_metrics.jsonl','a') as f:
             f.write(json.dumps({'epoch':epoch,'images':len(records),'metrics':metrics,'saved':saved})+'\n')
+        if self.fddb is not None:
+            self.fddb(model, epoch)
         return metrics

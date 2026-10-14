@@ -76,3 +76,13 @@ VALID:
 QAT:
   ENABLED: true
   DTYPE: float16
+
+
+# Independent FDDB validation; excluded from training and model selection.
+FDDB:
+  ENABLED: true
+  ROOT: '/home/j/database/FDDB copy'
+  BATCH_SIZE: 1
+  WORKERS: 1
+  INTERVAL: 1
+  EVALUATOR: '/home/j/projects/FaceDetection/tools/fddb_evaluation/evaluate'
