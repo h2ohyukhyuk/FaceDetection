@@ -1,0 +1,74 @@
+
+DEVICE: "GPU"
+
+MODEL:
+  MODEL_NAME: "apag_fpn_net2"
+  BACKBONE: 'resnet_18'
+  INPUT_SIZE: [256, 384]
+  OUTPUT_SIZE: [[64, 96],[32, 48],[16, 24],[8, 12]]
+  PRETRAINED: true
+  EXPORTABLE: false
+  ALIGN_CORNERS: true
+  OUTPUT_FORMAT: 'heatmap_offset_wh2'
+  PATH_SAVE: '/home/j/models/face_detection/apag-fpn2-fp16-qat-0000'
+
+
+DATASET:
+  NAME: "wider_face_center2"
+  ROOT_TRAIN: "/home/j/database/widerface/train"
+  ROOT_VALID: "/home/j/database/face_detection_valid_aspa"
+  NUM_CLASS: 1
+
+AUGMENTATION:
+
+
+OPTIMIZER:
+  OPT_NAME: "adam"
+  LR: 0.001
+  USE_LR_MULT: false
+  LR_MULT_TARGET: [ "xxxxx", "xxx" ]
+  LR_MULT_VAL: [ 1.0, 1.0 ]
+
+  LR_SCHEDULER:
+    SCHEDULER_NAME: multisteplr
+    milestones: [ 100, 160 ]
+    gamma: 0.1
+
+
+TRAIN:
+  SEED_NUMBER: 1024
+  CUDNN_DETER: true
+  CUDNN_BENCH: false
+
+  WORKERS: 4
+  BATCH_SIZE: 32
+  SHUFFLE: true
+
+  FREEZE: false
+#  PREWEIGHT_INFO:
+#    USE_CKPT: true
+#    LOCAL_CKPT: '/home/j/models_cla/apag-imgn/086.pt'
+
+  PREWEIGHT_INFO:
+    USE_CKPT: true
+    LOCAL_CKPT: '/home/j/models/face_detection/apag-fpn2-0000/180.pt'
+
+  BEGIN_EPOCH: 0
+  END_EPOCH: 200
+  RESUME: false
+  RESUME_PATH: '/'
+
+  MAX_STEP: -1
+  PRINT_FREQ: 40
+
+VALID:
+  WORKERS: 1
+  BATCH_SIZE: 1
+  SHUFFLE: false
+  SCORE_THRESHOLD: 0.4
+  IOU_THRESHOLD: 0.4
+
+# FP32 master weights + FP16 rounding simulation; no AMP.
+QAT:
+  ENABLED: true
+  DTYPE: float16
