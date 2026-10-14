@@ -1,0 +1,64 @@
+
+DEVICE: "GPU"
+
+MODEL:
+  MODEL_NAME: "ShiftNet"
+  BACKBONE: ''
+  INPUT_SIZE: [216, 384]
+  PRETRAINED: false
+  EXPORTABLE: false
+  ALIGN_CORNERS: true
+  OUTPUT_FORMAT: 'classification'
+  PATH_SAVE: 'C:/models_cla/ShiftNet'
+
+
+DATASET:
+  NAME: "cifar10"
+  ROOT: ""
+  NUM_CLASS: 10
+
+OPTIMIZER:
+  OPT_NAME: "adam"
+  LR: 0.001
+  USE_LR_MULT: false
+  LR_MULT_TARGET: [ "sfasfsaf", "afssasf" ]
+  LR_MULT_VAL: [ 1.0, 1.0 ]
+
+  LR_SCHEDULER:
+    SCHEDULER_NAME: multisteplr
+    milestones: [ 90, 130, 170 ]
+    gamma: 0.57
+
+
+TRAIN:
+  LOSS_TYPE: ['CE']
+
+  SEED_NUMBER: 1024
+  CUDNN_DETER: true
+  CUDNN_BENCH: false
+
+  WORKERS: 4
+  BATCH_SIZE: 128
+  SHUFFLE: true
+
+  FREEZE: false
+  PREWEIGHT_INFO:
+    USE_CKPT: false
+    LOCAL_CKPT: ''
+
+  BEGIN_EPOCH: 0
+  END_EPOCH: 10
+  RESUME: false
+  RESUME_PATH: '/'
+
+  MAX_STEP: -1
+  printFREQ: 100
+
+VALID:
+  WORKERS: 2
+  BATCH_SIZE: 128
+  SHUFFLE: false
+
+
+TEST:
+  PATH: "C:/models_cla/ShiftNet/010.pt"
