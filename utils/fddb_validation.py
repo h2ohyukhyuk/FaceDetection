@@ -28,7 +28,8 @@ class FDDBValidation:
                     p=p[np.isfinite(p).all(axis=1)]
                     p=p[(p[:,2]>p[:,0])&(p[:,3]>p[:,1])]
                     sx,sy=s['scale'];p[:,[0,2]]/=sx;p[:,[1,3]]/=sy
-                    records.append((s,p))
+                    metadata={k:s[k] for k in ('name','fold','ellipses')}
+                    records.append((metadata,p))
                 if (i+1)%100==0:logging.info('FDDB epoch %03d: %d/%d images',epoch,len(records),len(self.loader.dataset))
         for fold in range(1,11):
             self.write_predictions(out/f'fold-{fold:02d}-out.txt',[(s,p) for s,p in records if s['fold']==fold])

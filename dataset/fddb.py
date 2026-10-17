@@ -31,7 +31,10 @@ class FDDB(Dataset):
         tensor=torch.from_numpy(np.ascontiguousarray(((im.astype(np.float32)-128)/255).transpose(2,0,1)))
         return {**s,'image':tensor,'scale':np.array([dw/w,dh/h])}
 
-def collate(samples):return {'image':torch.stack([s['image'] for s in samples]),'samples':samples}
+def collate(samples):
+    # Metadata is retained for ROC export; never retain shared image storage.
+    return {'image':torch.stack([s['image'] for s in samples]),
+            'samples':[{k:v for k,v in s.items() if k != 'image'} for s in samples]}
 
 def get_loader(conf):
     c=conf['FDDB'];dataset=FDDB(c['ROOT'],conf['MODEL']['INPUT_SIZE'])

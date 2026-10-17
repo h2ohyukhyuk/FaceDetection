@@ -277,32 +277,26 @@ class HeatMapIgnore():
 
 
 def extract_peaks(heatmap, threshold=0.1, min_dist=9):
-
+    """Score-ordered Euclidean suppression, matching the original greedy rule."""
     ys, xs = np.where(heatmap > threshold)
-
     scores = heatmap[ys, xs]
-
-    order = np.argsort(scores)[::-1]
-
+    order = np.argsort(scores)[::-1]  # Preserve original equal-score ordering.
+    blocked = np.zeros(heatmap.shape, dtype=bool)
+    radius = max(0, int(np.ceil(abs(min_dist))) - 1)
+    dy, dx = np.mgrid[-radius:radius+1, -radius:radius+1]
+    disk = dx * dx + dy * dy < min_dist ** 2
+    height, width = heatmap.shape
     peaks = []
-
     for idx in order:
-
-        x = xs[idx]
-        y = ys[idx]
-
-        keep = True
-
-        for px, py, s in peaks:
-
-            if (px - x) ** 2 + (py - y) ** 2 < min_dist ** 2:
-                keep = False
-                break
-
-        if keep:
-            peaks.append((x, y, scores[idx]))
-
+        x, y = xs[idx], ys[idx]
+        if blocked[y, x]:
+            continue
+        peaks.append((x, y, scores[idx]))
+        x0, x1 = max(0, x-radius), min(width, x+radius+1)
+        y0, y1 = max(0, y-radius), min(height, y+radius+1)
+        blocked[y0:y1, x0:x1] |= disk[y0-y+radius:y1-y+radius, x0-x+radius:x1-x+radius]
     return np.array(peaks, dtype=np.float32)
+
 
 def gradient_refine(heatmap, peaks, offset=0.125):
     """

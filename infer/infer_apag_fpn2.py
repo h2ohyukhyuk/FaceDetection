@@ -14,7 +14,7 @@ def main():
     device = torch.device("cuda:0")
     #device = torch.device("cpu")
     model = Network()
-    path_model = "/home/j/models/face_detection/apag-fpn2-0000/180.pt"
+    path_model = "/home/j/models/face_detection/apag-fpn2-0000/005.pt"
     model = load_model_from_path(
         path_model,
         model,

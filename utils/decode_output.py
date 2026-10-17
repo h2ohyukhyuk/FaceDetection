@@ -116,51 +116,6 @@ def nms(rects, iou_thresh=0.5):
     return rects[keep]
 
 
-def nms(rects, iou_thresh=0.5):
-    """
-    rects : (N,5)
-        [x1, y1, x2, y2, score]
-    """
-
-    if len(rects) == 0:
-        return rects
-
-    x1 = rects[:, 0]
-    y1 = rects[:, 1]
-    x2 = rects[:, 2]
-    y2 = rects[:, 3]
-    score = rects[:, 4]
-
-    area = (x2 - x1) * (y2 - y1)
-
-    order = score.argsort()[::-1]
-
-    keep = []
-
-    while order.size > 0:
-
-        i = order[0]
-        keep.append(i)
-
-        xx1 = np.maximum(x1[i], x1[order[1:]])
-        yy1 = np.maximum(y1[i], y1[order[1:]])
-        xx2 = np.minimum(x2[i], x2[order[1:]])
-        yy2 = np.minimum(y2[i], y2[order[1:]])
-
-        w = np.maximum(0.0, xx2 - xx1)
-        h = np.maximum(0.0, yy2 - yy1)
-
-        inter = w * h
-
-        iou = inter / (area[i] + area[order[1:]] - inter + 1e-6)
-
-        inds = np.where(iou < iou_thresh)[0]
-
-        order = order[inds + 1]
-
-    return rects[keep]
-
-
 def calc_metric(gt_rects, pred_rects, iou_thresh=0.5):
     """
     gt_rects   : (N,4)

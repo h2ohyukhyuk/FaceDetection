@@ -1,0 +1,88 @@
+
+DEVICE: "GPU"
+
+MODEL:
+  MODEL_NAME: "apag_fpn_net2_landmark"
+  BACKBONE: 'resnet_18'
+  INPUT_SIZE: [256, 384]
+  OUTPUT_SIZE: [[64, 96],[32, 48],[16, 24],[8, 12]]
+  PRETRAINED: true
+  EXPORTABLE: false
+  ALIGN_CORNERS: true
+  OUTPUT_FORMAT: 'heatmap_offset_wh2_landmark'
+  PATH_SAVE: '/home/j/models/face_detection/apag-fpn2-wider-original-0000-landmark-heatmap'
+
+
+DATASET:
+  NAME: "wider_face_landmark2"
+  ROOT_TRAIN: "/home/j/database/widerface_original"
+  ROOT_VALID: "/home/j/database/widerface_original"
+  NUM_CLASS: 1
+  LANDMARK_LABEL: '/home/j/database/widerface_original/wider_face_split/label.txt'
+
+AUGMENTATION:
+
+
+OPTIMIZER:
+  OPT_NAME: "adam"
+  LR: 0.001
+  USE_LR_MULT: false
+  LR_MULT_TARGET: [ "xxxxx", "xxx" ]
+  LR_MULT_VAL: [ 1.0, 1.0 ]
+
+  LR_SCHEDULER:
+    SCHEDULER_NAME: multisteplr
+    milestones: [ 100, 160 ]
+    gamma: 0.1
+
+
+TRAIN:
+  SEED_NUMBER: 1024
+  CUDNN_DETER: true
+  CUDNN_BENCH: false
+
+  WORKERS: 4
+  BATCH_SIZE: 32
+  SHUFFLE: true
+
+  FREEZE: false
+  PREWEIGHT_INFO:
+    USE_CKPT: true
+    LOCAL_CKPT: '/home/j/models_cla/apag-imgn/086.pt'
+
+  BEGIN_EPOCH: 0
+  END_EPOCH: 200
+  RESUME: false
+  RESUME_PATH: '/'
+
+  MAX_STEP: -1
+  PRINT_FREQ: 40
+
+VALID:
+  WORKERS: 1
+  BATCH_SIZE: 1
+  SHUFFLE: false
+  SCORE_THRESHOLD: 0.4
+  IOU_THRESHOLD: 0.4
+  NMS_IOU_THRESHOLD: 0.4
+  EVAL_IOU_THRESHOLD: 0.5
+  AP_SCORE_THRESHOLD: 0.001
+  GT_DIR: '/home/j/projects/FaceDetection/dataset/widerface_eval_gt' 
+
+# Independent FDDB validation; excluded from training and model selection.
+FDDB:
+  ENABLED: true
+  ROOT: '/home/j/database/FDDB copy'
+  BATCH_SIZE: 1
+  WORKERS: 1
+  INTERVAL: 1
+  EVALUATOR: '/home/j/projects/FaceDetection/tools/fddb_evaluation/evaluate'
+
+LANDMARK:
+  NUM_POINTS: 5
+  LOSS_WEIGHT: 1.0
+  HEATMAP_LOSS_WEIGHT: 1.0
+  OFFSET_LOSS_WEIGHT: 1.0
+  # Output: [0:5] detection, [5:10] landmark logits, [10:20] local xy offsets.
+  # Each landmark has a stride-4 heatmap; offsets are supervised around its peak.
+  # Missing/out-of-crop points are masked; visibility flags 0 and 1 are annotated.

@@ -84,7 +84,9 @@ class OriginalValid(Dataset):
 
 
 def valid_collate(samples):
-    return {'image':torch.stack([s['image'] for s in samples]),'samples':samples}
+    # Keep IPC-shared image tensors out of metadata retained for epoch metrics.
+    return {'image':torch.stack([s['image'] for s in samples]),
+            'samples':[{k:v for k,v in s.items() if k != 'image'} for s in samples]}
 
 
 def get_train_loader(conf):

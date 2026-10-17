@@ -44,7 +44,9 @@ class Validationer:
                     boxes=boxes[(boxes[:,2]>boxes[:,0])&(boxes[:,3]>boxes[:,1])]
                     sx,sy=sample['scale']
                     boxes[:,[0,2]]/=sx;boxes[:,[1,3]]/=sy
-                    records.append((sample,boxes))
+                    # Retain only evaluation metadata, even with a custom loader.
+                    metadata={k:sample[k] for k in ('name','boxes','keep')}
+                    records.append((metadata,boxes))
                 if (i+1)%100==0:
                     logging.info('WIDER validation epoch %03d: %d/%d images',epoch,len(records),len(dataloader.dataset))
         metrics=evaluate(records,self.score,self.eval_iou)
