@@ -1,0 +1,61 @@
+{
+  "checkpoint": "/home/j/models/face_detection/apag-fpn2-0000/005.pt",
+  "backend": "XNNPACK CPU FP32",
+  "torch": "2.12.1+cu130",
+  "executorch": "1.3.1",
+  "machine": "x86_64",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+  "threads": 1,
+  "seed": 1024,
+  "warmup": 30,
+  "runs": 200,
+  "timing": "Python method.execute only; excludes load/export/input generation/preprocessing/postprocessing",
+  "results": [
+    {
+      "input_shape": [
+        1,
+        3,
+        256,
+        384
+      ],
+      "output_shape": [
+        1,
+        5,
+        64,
+        96
+      ],
+      "pte": "/home/j/projects/FaceDetection/onnx__/apag_fpn2_005_256x384.pte",
+      "exported": true,
+      "bytes": 4091540,
+      "max_abs_error": 1.239776611328125e-05,
+      "mean_ms": 86.07977234,
+      "median_ms": 84.27129,
+      "p90_ms": 90.8449208,
+      "min_ms": 53.86601,
+      "max_ms": 186.601346
+    },
+    {
+      "input_shape": [
+        1,
+        3,
+        192,
+        288
+      ],
+      "output_shape": [
+        1,
+        5,
+        48,
+        72
+      ],
+      "pte": "/home/j/projects/FaceDetection/onnx__/apag_fpn2_005_192x288.pte",
+      "exported": true,
+      "bytes": 4091540,
+      "max_abs_error": 1.621246337890625e-05,
+      "mean_ms": 44.525329485,
+      "median_ms": 45.111639,
+      "p90_ms": 48.655003099999995,
+      "min_ms": 27.003012,
+      "max_ms": 54.302819
+    }
+  ]
+}

@@ -55,8 +55,9 @@ class Gamma(object):
 
 class Blur(object):
 
-    def __init__(self, blur = 0.5):
+    def __init__(self, blur = 0.5, kernel_range=(3, 11)):
         self.blur = blur
+        self.kernel_range = kernel_range
 
     @staticmethod
     def get_params( blur ):
@@ -72,7 +73,7 @@ class Blur(object):
         boolBlur = self.get_params(self.blur)
 
         if boolBlur:
-            size_gaussian_blur = random.randint(3, 11)
+            size_gaussian_blur = random.randint(*self.kernel_range)
             if size_gaussian_blur % 2 == 0:
                 size_gaussian_blur = size_gaussian_blur + 1
             img = cv2.GaussianBlur(img, (size_gaussian_blur, size_gaussian_blur), sigmaX=0)

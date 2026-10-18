@@ -4,8 +4,8 @@ DEVICE: "GPU"
 MODEL:
   MODEL_NAME: "apag_fpn_net2"
   BACKBONE: 'resnet_18'
-  INPUT_SIZE: [256, 384]
-  OUTPUT_SIZE: [[64, 96],[32, 48],[16, 24],[8, 12]]
+  INPUT_SIZE: [256, 384] # [H, W], each must be a positive multiple of 32.
+  # Output target H/W is derived from INPUT_SIZE / 4.
   PRETRAINED: true
   EXPORTABLE: false
   ALIGN_CORNERS: true
@@ -20,6 +20,30 @@ DATASET:
   NUM_CLASS: 1
 
 AUGMENTATION:
+  SRC_FACE_MIN: 24         # Original face max(w,h) required for center selection.
+  MIN_FACE_RATIO: 0.07     # Final face max(w,h) <= min(input H,W)*ratio: background.
+  BACKGROUND_PROB: 0.2
+  FILL_VALUE: 128          # Erasing is only used in background branches.
+  TRANSLATION_MARGIN_RATIO: 0.1
+  TRANSLATION_MIN_MARGIN: 5
+  TRANSLATION_MAX_MARGIN_RATIO: 0.45
+  FOREGROUND:
+    MIN_FACE_SIZE: 10      # Sampling bound; independent of MIN_FACE_RATIO filtering.
+    SCALE_RANGE: [0.5, 2.0] # Target face size relative to selected original face.
+    SCALE_MIN_GAP: 10
+    ROTATION_DEGREES: 10
+    ROTATION_PROB: 0.5
+    FLIP_PROB: 0.5
+    CROP_SCALE_RANGE: [0.2, 1.0] # No-candidate background fallback.
+  BACKGROUND:
+    SCALE_RANGE: [0.5, 2.0] # Target crop size relative to max(input H,W).
+    ROTATION_DEGREES: 30
+    FLIP_PROB: 0.5
+    CROP_SCALE_RANGE: [0.2, 0.95]
+  PIXEL_NOISE: 0.4         # Per-channel multiplicative noise strength.
+  GAMMA: 0.3              # Gamma shift range; must be <1.
+  BLUR_PROB: 0.1
+  BLUR_KERNEL_RANGE: [3, 11] # Random integer kernel, rounded up to odd.
 
 
 OPTIMIZER:

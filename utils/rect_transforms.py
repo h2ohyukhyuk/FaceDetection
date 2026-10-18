@@ -15,8 +15,22 @@ class ImageBoxSRTF:
         dst_height=256,
         rot=10,
         flip_prob=0.5,
-        border_value=(128, 128, 128)
+        border_value=(128, 128, 128),
+        scale_range=(0.5, 2.0),
+        rotation_prob=0.5,
+        crop_scale_range=(0.2, 1.0),
+        min_scale_gap=10,
+        translation_margin_ratio=0.1,
+        translation_min_margin=5,
+        translation_max_margin_ratio=0.45,
     ):
+        self.scale_range = scale_range
+        self.rotation_prob = rotation_prob
+        self.crop_scale_range = crop_scale_range
+        self.min_scale_gap = min_scale_gap
+        self.translation_margin_ratio = translation_margin_ratio
+        self.translation_min_margin = translation_min_margin
+        self.translation_max_margin_ratio = translation_max_margin_ratio
         self.src_rect_min = src_rect_min
         self.dst_width = dst_width
         self.dst_height = dst_height
@@ -34,8 +48,9 @@ class ImageBoxSRTF:
 
         # scale
         src_rect_size = max(w, h)
-        max_size = min(self.dst_rect_max, src_rect_size * 2.0)
-        min_size = min(max_size-10,max(self.dst_rect_min, src_rect_size * 0.5))
+        max_size = min(self.dst_rect_max, src_rect_size * self.scale_range[1])
+        min_size = min(max_size-self.min_scale_gap,max(self.dst_rect_min, src_rect_size * self.scale_range[0]))
+        min_size = max(np.finfo(np.float32).eps, min_size)
 
         target_rect_size = np.exp(
             np.random.uniform(
@@ -46,7 +61,8 @@ class ImageBoxSRTF:
         scale = target_rect_size / src_rect_size
 
         # translation
-        margin = min( int(self.dst_height*0.45), max(5, int(target_rect_size*0.1)))
+        margin = min(int(min(self.dst_width, self.dst_height)*self.translation_max_margin_ratio),
+                     max(int(self.translation_min_margin), int(target_rect_size*self.translation_margin_ratio)))
         dst_cx = random.randint(margin,self.dst_width - margin)
         dst_cy = random.randint(margin, self.dst_height - margin)
         cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
@@ -54,7 +70,7 @@ class ImageBoxSRTF:
         ty = dst_cy - cy
 
         # rotation
-        if random.random() < 0.5:
+        if random.random() < 1.0 - self.rotation_prob:
             rot = 0
         else:
             rot = random.uniform(-self.rot, self.rot)
@@ -162,10 +178,10 @@ class ImageBoxSRTF:
     def random_crop(self, img):
         h, w = img.shape[:2]
 
-        scale = random.uniform(0.2, 1.0)
+        scale = random.uniform(*self.crop_scale_range)
 
-        crop_w = int(w * scale)
-        crop_h = int(h * scale)
+        crop_w = max(1, int(w * scale))
+        crop_h = max(1, int(h * scale))
 
         x = random.randint(0, w - crop_w)
         y = random.randint(0, h - crop_h)
@@ -197,7 +213,7 @@ class ImageBoxSRTF:
         if len(valid_idx) == 0:
             for rt in rects:
                 x1, y1, x2, y2 = rt.astype(int)
-                img[y1:y2, x1:x2, :] = 128
+                img[max(0,y1):min(img.shape[0],y2), max(0,x1):min(img.shape[1],x2), :] = self.border_value
             return self.random_crop(img), np.zeros((0,4), dtype=np.float32)
         else:
             idx = random.choice(valid_idx)
@@ -206,7 +222,7 @@ class ImageBoxSRTF:
             for i, rt in enumerate(rects):
                 if i not in valid_idx:
                     x1, y1, x2, y2 = rt.astype(int)
-                    img[y1:y2, x1:x2, :] = 128
+                    img[max(0,y1):min(img.shape[0],y2), max(0,x1):min(img.shape[1],x2), :] = self.border_value
 
             rects = rects[valid_idx]
 
@@ -241,12 +257,21 @@ class ImageBoxBG:
         dst_height=256,
         rot=30,
         flip_prob=0.5,
-        border_value=(128, 128, 128)
-
+        border_value=(128, 128, 128),
+        scale_range=(0.5, 2.0),
+        crop_scale_range=(0.2, 0.95),
+        translation_margin_ratio=0.1,
+        translation_min_margin=5,
+        translation_max_margin_ratio=0.45,
     ):
         self.dst_width = dst_width
         self.dst_height = dst_height
         self.dst_size = max(dst_width, dst_height)
+        self.scale_range = scale_range
+        self.crop_scale_range = crop_scale_range
+        self.translation_margin_ratio = translation_margin_ratio
+        self.translation_min_margin = translation_min_margin
+        self.translation_max_margin_ratio = translation_max_margin_ratio
 
         self.dst_rect_max = max(self.dst_width, self.dst_height)
         self.rot = rot
@@ -262,8 +287,8 @@ class ImageBoxBG:
         # scale
         src_rect_size = max(w, h)
 
-        min_size = self.dst_size * 0.5
-        max_size = self.dst_size * 2.0
+        min_size = self.dst_size * self.scale_range[0]
+        max_size = self.dst_size * self.scale_range[1]
 
         target_size = np.exp(
             np.random.uniform(
@@ -274,7 +299,8 @@ class ImageBoxBG:
         scale = target_size / src_rect_size
 
         # translation
-        margin = min( int(self.dst_height*0.45), max(5, int(target_size*0.1)))
+        margin = min(int(min(self.dst_width, self.dst_height)*self.translation_max_margin_ratio),
+                     max(int(self.translation_min_margin), int(target_size*self.translation_margin_ratio)))
         dst_cx = random.randint(margin,self.dst_width - margin)
         dst_cy = random.randint(margin, self.dst_height - margin)
         cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
@@ -300,14 +326,14 @@ class ImageBoxBG:
 
         for rt in rects:
             x1, y1, x2, y2 = rt.astype(int)
-            img[y1:y2, x1:x2, :] = 128
+            img[max(0,y1):min(img.shape[0],y2), max(0,x1):min(img.shape[1],x2), :] = self.border_value
 
         h, w = img.shape[:2]
 
-        scale = random.uniform(0.2, 0.95)
+        scale = random.uniform(*self.crop_scale_range)
 
-        crop_w = int(w * scale)
-        crop_h = int(h * scale)
+        crop_w = max(1, int(w * scale))
+        crop_h = max(1, int(h * scale))
 
         x1 = random.randint(0, w - crop_w)
         y1 = random.randint(0, h - crop_h)

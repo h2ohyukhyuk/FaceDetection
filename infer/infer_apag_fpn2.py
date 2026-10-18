@@ -14,7 +14,7 @@ def main():
     device = torch.device("cuda:0")
     #device = torch.device("cpu")
     model = Network()
-    path_model = "/home/j/models/face_detection/apag-fpn2-0000/005.pt"
+    path_model = "/home/j/models/face_detection/apag-fpn2-0000/180.pt"
     model = load_model_from_path(
         path_model,
         model,
@@ -45,7 +45,8 @@ def main():
         # -------------------------------------------------
         # Resize (384x256)
         # -------------------------------------------------
-        img = cv2.resize(frame, (384, 256))
+        #img = cv2.resize(frame, (384, 256))
+        img = cv2.resize(frame, (288, 192))
 
         img_input = (img.astype(np.float32) - 128.0) / 255.0
         img_input = img_input.transpose(2, 0, 1)
